@@ -1,0 +1,9 @@
+{
+    "tslint.enable": true,
+    "files.insertFinalNewline": true,
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.reportStyleChecksAsWarnings": true,
+    "typescript.useCodeSnippetsOnMethodSuggest": false,
+    "typescript.autoImportSuggestions.enabled": false,
+    "editor.formatOnSave": true
+}
