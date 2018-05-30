@@ -40,7 +40,7 @@ export const view: Component<ViewProps> = ({ state, change }) => {
   });
 
   return (
-    <div class="container">
+    <div>
       <div class="badge badge-secondary">{statusText}</div>
       <br />
       <ul>
