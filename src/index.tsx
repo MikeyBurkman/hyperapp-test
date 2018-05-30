@@ -10,32 +10,32 @@ import {
 } from '@hyperapp/router';
 import { ActionsType, app, h, View } from 'hyperapp';
 
+import * as alerts from './components/alerts';
 import * as collectionsList from './components/collectionList';
-import * as status from './components/status';
 
 // State
 export interface State {
   location: LocationState;
-  status: status.State;
+  alerts: alerts.State;
   collectionsList: collectionsList.State;
 }
 
 export const state: State = {
   location: location.state,
-  status: status.initialState,
+  alerts: alerts.initialState,
   collectionsList: collectionsList.initialState
 };
 
 // Update
 export interface Actions {
   location: LocationActions;
-  status: status.Actions;
+  alerts: alerts.Actions;
   collectionsList: collectionsList.Actions;
 }
 
 export const actions: ActionsType<State, Actions> = {
   location: location.actions,
-  status: status.actions,
+  alerts: alerts.actions,
   collectionsList: collectionsList.actions
 };
 
@@ -49,7 +49,7 @@ const Foo = ({ match }: RenderProps<{ name: string }>) => {
 };
 const view: View<State, Actions> = (rootState, rootActions) => (
   <main>
-    <status.view state={rootState.status} change={rootActions.status.change} />
+    <alerts.view state={rootState.alerts} viewActions={rootActions.alerts} />
 
     <Switch>
       <Route path="/collections/:name" render={Foo} />

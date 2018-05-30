@@ -6,6 +6,16 @@
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/@hyperapp/router/-/router-0.7.0.tgz#99fde37696d07949514c3519db1fe6785a053d2d"
 
+"@types/bson@^1.0.8":
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/@types/bson/-/bson-1.0.8.tgz#6ad272b3f049e9598ec33aed09cf56d8946b75f1"
+  dependencies:
+    "@types/node" "*"
+
+"@types/node@*":
+  version "10.1.4"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.1.4.tgz#606651d3f8a8bec08b8cb262161aab9209f4a29d"
+
 abbrev@1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
@@ -437,6 +447,10 @@ browserslist@^1.3.6, browserslist@^1.5.2, browserslist@^1.7.6:
   dependencies:
     caniuse-db "^1.0.30000639"
     electron-to-chromium "^1.2.7"
+
+bson@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/bson/-/bson-2.0.6.tgz#d829f8c26797174ec435219901cbc05a13def410"
 
 buffer-from@^1.0.0:
   version "1.0.0"
