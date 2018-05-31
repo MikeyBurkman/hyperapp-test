@@ -39,9 +39,11 @@
   "dependencies": {
     "@hyperapp/router": "^0.7.0",
     "@types/bson": "^1.0.8",
+    "@types/lodash": "^4.14.109",
     "@types/query-string": "^5.1.0",
     "bson": "^2.0.6",
     "hyperapp": "1.2.5",
+    "lodash": "^4.17.10",
     "query-string": "^6.1.0",
     "ts-union": "^1.1.0"
   },

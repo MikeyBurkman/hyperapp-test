@@ -64,7 +64,7 @@ const view: View<State, Actions> = (rootState, rootActions) => (
             return <Redirect to={match.url + qs.str} />;
           }
 
-          rootActions.collectionView.init({
+          rootActions.collectionView.search({
             name: match.params.name,
             opts: qs.parsed
           });

@@ -1,18 +1,19 @@
 import { Link } from '@hyperapp/router';
 import { ActionResult, ActionsType, ActionType, Component, h } from 'hyperapp';
 
+import { isEqual } from 'lodash';
 import { t, Union } from 'ts-union';
 
 import { getCollection, SearchOpts } from '../../api';
 
-interface LastSearch {
+interface SearchResults {
   results: object[];
-  searchOpts: SearchOpts;
+  timestamp: Date;
 }
 
 const collData = Union({
   fetching: t(),
-  loaded: t<LastSearch>(),
+  loaded: t<SearchResults>(),
   error: t()
 });
 
@@ -21,46 +22,45 @@ type CollData = typeof collData.T;
 export interface State {
   firstLoad: boolean;
   name: string | null;
+  searchOpts: SearchOpts | null;
   data: CollData;
 }
 
 export const initialState: State = {
   firstLoad: true,
   name: null,
+  searchOpts: null,
   data: collData.fetching()
 };
 
 // Update
 export interface Actions {
-  init(params: { name: string; opts: SearchOpts }): State;
   updateData(state: Partial<State>): State;
   search(params: { name: string; opts: SearchOpts }): State;
 }
 
 export const actions: ActionsType<State, Actions> = {
-  init: ({ name, opts }: { name: string; opts: SearchOpts }) => ($state, $actions) => {
-    if (name !== $state.name) {
-      return $actions.search({
-        name: name,
-        opts: opts
-      });
-    }
-  },
   updateData: (state: Partial<State>) => ({ ...state }),
   search: ({ name, opts }: { name: string; opts: SearchOpts }) => ($state: State, a: Actions) => {
+    if (name === $state.name && isEqual(opts, $state.searchOpts)) {
+      // Already searching
+      return;
+    }
+    const timestamp = new Date();
     getCollection(name, opts).then((results) => {
       a.updateData({
         name: name,
+        searchOpts: opts,
         data: collData.loaded({
-          results,
-          searchOpts: opts
+          results: results,
+          timestamp: timestamp
         })
       });
     });
     return {
       name: name,
-      data: collData.fetching(),
-      firstLoad: false
+      searchOpts: opts,
+      data: collData.fetching()
     };
   }
 };
@@ -74,7 +74,7 @@ export const view: Component<ViewProps, State, Actions> = ({ state }) => {
   const body = collData.match(state.data, {
     fetching: () => getProgressBar('bg-info'),
     error: () => getProgressBar('bg-danger'),
-    loaded: (lastSearch) => formatResults(lastSearch)
+    loaded: (searchResults) => formatResults(searchResults)
   });
 
   return (
@@ -101,13 +101,16 @@ function getProgressBar(type: string) {
   );
 }
 
-function formatResults(lastSearch: LastSearch) {
-  const headers = getHeaders(lastSearch.results);
+function formatResults(searchResults: SearchResults) {
+  const headers = getHeaders(searchResults.results);
   return (
-    <table class="table">
-      {formatHeaders(headers)}
-      <tbody>{lastSearch.results.map((row) => formatRow(row, headers))}</tbody>
-    </table>
+    <div>
+      <table class="table">
+        {formatHeaders(headers)}
+        <tbody>{searchResults.results.map((row) => formatRow(row, headers))}</tbody>
+      </table>
+      <h5>As of {searchResults.timestamp.toString()}</h5>
+    </div>
   );
 }
 
