@@ -1,21 +1,18 @@
 {
-	"rules": {
-		"only-arrow-functions": false,
-		"no-console": true,
-		"object-literal-sort-keys": false,
-		"interface-name": false,
-		"object-literal-shorthand": false,
-		"no-empty-interface": false,
-		"no-unused-expression": true,
-		"no-unused-variable": [
-			true,
-			{
-				"ignore-pattern": "log"
-			}
-		]
-	},
-	"extends": [
-		"tslint:recommended",
-		"tslint-config-prettier"
-	]
+  "rules": {
+    "only-arrow-functions": false,
+    "no-console": false,
+    "object-literal-sort-keys": false,
+    "interface-name": false,
+    "object-literal-shorthand": false,
+    "no-empty-interface": false,
+    "no-unused-expression": true,
+    "no-unused-variable": [
+      true,
+      {
+        "ignore-pattern": "log"
+      }
+    ]
+  },
+  "extends": ["tslint:recommended", "tslint-config-prettier"]
 }

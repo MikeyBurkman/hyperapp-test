@@ -40,10 +40,9 @@ export const actions: ActionsType<State, Actions> = {
 // View
 export interface ViewProps {
   state: State;
-  navigateToCollection: (name: string) => ActionResult<any>;
 }
 
-export const view: Component<ViewProps> = ({ state, navigateToCollection }) => {
+export const view: Component<ViewProps, State, Actions> = ({ state }) => {
   const val = collectionsList.match(state.collections, {
     error: (str) => <span class="alert alert-danger">Error fetching collections: {str}</span>,
     unfetched: () => (
