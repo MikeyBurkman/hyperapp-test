@@ -10,45 +10,22 @@ import {
 } from '@hyperapp/router';
 import { ActionsType, app, h, View } from 'hyperapp';
 
+// @ts-ignore
+import { withLogger } from '@hyperapp/logger';
+
 import { getDefaultCollectionSearchString, parseCollectionSearchQuery } from './api';
-import * as alerts from './components/alerts';
-import * as collectionsList from './components/collectionList';
-import * as collectionView from './components/collectionView';
 
-// State
-export interface State {
-  location: LocationState;
-  alerts: alerts.State;
-  collectionsList: collectionsList.State;
-  collectionView: collectionView.State;
-}
+import { Actions, actions } from './actions';
+import { initialState, State } from './model';
 
-export const state: State = {
-  location: location.state,
-  alerts: alerts.initialState,
-  collectionsList: collectionsList.initialState,
-  collectionView: collectionView.initialState
-};
-
-// Update
-export interface Actions {
-  location: LocationActions;
-  alerts: alerts.Actions;
-  collectionsList: collectionsList.Actions;
-  collectionView: collectionView.Actions;
-}
-
-export const actions: ActionsType<State, Actions> = {
-  location: location.actions,
-  alerts: alerts.actions,
-  collectionsList: collectionsList.actions,
-  collectionView: collectionView.actions
-};
+import AlertsView from './alerts';
+import CollectionsListView from './collectionsList';
+import CollectionView from './collectionView';
 
 // View
 const view: View<State, Actions> = (rootState, rootActions) => (
   <main>
-    <alerts.view state={rootState.alerts} viewActions={rootActions.alerts} />
+    <AlertsView />
 
     <Switch>
       <Route
@@ -56,37 +33,33 @@ const view: View<State, Actions> = (rootState, rootActions) => (
         render={({ match }: RenderProps<{ name: string }>) => {
           const qs = parseCollectionSearchQuery(window.location.search);
           if (!qs) {
+            console.log('No query string, redirecting');
             return <Redirect to={match.url + getDefaultCollectionSearchString()} />;
           }
 
           if (qs.str !== window.location.search) {
+            console.log('Query string does not match, redirecting');
             // To make sure that the search string matches exactly what we're searching
             return <Redirect to={match.url + qs.str} />;
           }
 
-          rootActions.collectionView.search({
+          rootActions.search({
             name: match.params.name,
             opts: qs.parsed
           });
-          return <collectionView.view state={rootState.collectionView} />;
+          return <CollectionView />;
         }}
       />
       <Route
         path="/"
         parent
-        render={({ match }) =>
-          match.isExact ? (
-            <collectionsList.view state={rootState.collectionsList} />
-          ) : (
-            <Redirect to="/" />
-          )
-        }
+        render={({ match }) => (match.isExact ? <CollectionsListView /> : <Redirect to="/" />)}
       />
     </Switch>
   </main>
 );
 
-const main = app(state, actions, view, document.getElementById('app'));
-main.collectionsList.fetchCollections();
+const main = withLogger(app)(initialState, actions, view, document.getElementById('app'));
+main.fetchCollections();
 
 location.subscribe(main.location);

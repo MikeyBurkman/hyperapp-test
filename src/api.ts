@@ -1,25 +1,12 @@
 import * as qs from 'query-string';
 
-export interface Collection {
-  name: string;
-}
+import { Collection, SearchOpts } from './model';
 
 export function getCollectionsList() {
   return new Promise<Collection[]>((resolve) => {
     const colls = [{ name: 'foo' }, { name: 'bar' }, { name: 'qux' }, { name: 'logs' }];
     setTimeout(() => resolve(colls), 1200);
   });
-}
-
-export interface SearchOpts {
-  start: number;
-  limit: number;
-  query?: object;
-  projection?: object;
-  sort?: {
-    col: string;
-    order: 'ASC' | 'DESC';
-  };
 }
 
 export function getCollection(name: string, opts: SearchOpts) {
