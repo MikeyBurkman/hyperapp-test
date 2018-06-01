@@ -44,7 +44,7 @@
     "@types/query-string": "^5.1.0",
     "bson": "^2.0.6",
     "hyperapp": "1.2.5",
-    "lodash": "^4.17.10",
+    "lodash.isequal": "^4.5.0",
     "query-string": "^6.1.0",
     "ts-union": "^1.1.0"
   },

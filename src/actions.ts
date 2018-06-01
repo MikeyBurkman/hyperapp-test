@@ -1,6 +1,6 @@
 import { location, LocationActions } from '@hyperapp/router';
 import { ActionsType } from 'hyperapp';
-import { isEqual } from 'lodash';
+import * as isEqual from 'lodash.isequal';
 
 import {
   Alert,

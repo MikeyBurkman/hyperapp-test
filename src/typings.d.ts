@@ -77,3 +77,11 @@ declare module '@hyperapp/router' {
 declare module '@hyperapp/logger' {
   export function withLogger<T>(app: T): T;
 }
+
+declare module 'lodash.isequal' {
+  interface IsEqual {
+    (x: any, y: any): Boolean;
+  }
+  const isEqual: IsEqual;
+  export = isEqual;
+}
