@@ -1,15 +1,12 @@
 import { withLogger } from '@hyperapp/logger';
 import {
-  Link,
   location,
-  LocationActions,
-  LocationState,
   Redirect,
   RenderProps,
   Route,
   Switch
 } from '@hyperapp/router';
-import { ActionsType, app, h, View } from 'hyperapp';
+import { app, h, View } from 'hyperapp';
 
 import { getDefaultCollectionSearchString, parseCollectionSearchQuery } from './api';
 
@@ -45,13 +42,19 @@ const view: View<State, Actions> = (rootState, rootActions) => (
             name: match.params.name,
             opts: qs.parsed
           });
-          return <CollectionView />;
+          return <CollectionView collection={rootState.searchResults} />;
         }}
       />
       <Route
         path="/"
         parent
-        render={({ match }) => (match.isExact ? <CollectionsListView /> : <Redirect to="/" />)}
+        render={({ match }) =>
+          match.isExact ? (
+            <CollectionsListView collectionList={rootState.collectionList} />
+          ) : (
+            <Redirect to="/" />
+          )
+        }
       />
     </Switch>
   </main>

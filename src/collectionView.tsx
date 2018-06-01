@@ -1,14 +1,16 @@
-import { Link } from '@hyperapp/router';
 import { Component, h } from 'hyperapp';
 
-import { Actions } from './actions';
-import { CollectionSearchResults, collectionView, State } from './model';
+import { CollectionSearchResults, collectionView, CollectionView } from './model';
 
-const view: Component<{}, State, Actions> = () => (state, actions) => {
-  return collectionView.match(state.searchResults, {
+interface ViewProps {
+  collection: CollectionView;
+}
+
+const view: Component<ViewProps> = ({ collection }) => {
+  return collectionView.match(collection, {
     unfetched: () => getProgressBar('bg-info'),
     fetching: (name) => getProgressBar('bg-info', name),
-    loaded: (name, opts, searchResults) => formatResults(name, searchResults),
+    loaded: (name, opts, results) => formatResults(name, results),
     error: () => getProgressBar('bg-danger')
   });
 };

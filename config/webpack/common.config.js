@@ -16,7 +16,9 @@ module.exports = {
         enforce: 'pre',
         loader: 'tslint-loader',
         options: {
-          failOnHint: true
+          failOnHint: true,
+          typeCheck: false, // Enable this and fix occasionally -- they too long to do every time
+          fix: false
         }
       },
       {

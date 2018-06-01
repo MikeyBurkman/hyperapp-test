@@ -1,11 +1,14 @@
 import { Link } from '@hyperapp/router';
 import { Component, h } from 'hyperapp';
 
-import { Actions } from './actions';
-import { Collection, collectionsList, State } from './model';
+import { Collection, collectionsList, CollectionsList } from './model';
 
-const view: Component<{}, State, Actions> = () => (state, actions) => {
-  const val = collectionsList.match(state.collectionList, {
+interface ViewProps {
+  collectionList: CollectionsList;
+}
+
+const view: Component<ViewProps> = ({ collectionList }) => {
+  const val = collectionsList.match(collectionList, {
     error: (str) => <span class="alert alert-danger">Error fetching collections: {str}</span>,
     unfetched: () => (
       <div class="progress">
