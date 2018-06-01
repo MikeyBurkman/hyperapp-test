@@ -73,3 +73,7 @@ declare module '@hyperapp/router' {
 
   export const location: RouterLocation;
 }
+
+declare module '@hyperapp/logger' {
+  export function withLogger<T>(app: T): T;
+}

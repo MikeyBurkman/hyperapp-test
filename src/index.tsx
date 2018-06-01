@@ -1,3 +1,4 @@
+import { withLogger } from '@hyperapp/logger';
 import {
   Link,
   location,
@@ -9,9 +10,6 @@ import {
   Switch
 } from '@hyperapp/router';
 import { ActionsType, app, h, View } from 'hyperapp';
-
-// @ts-ignore
-import { withLogger } from '@hyperapp/logger';
 
 import { getDefaultCollectionSearchString, parseCollectionSearchQuery } from './api';
 
@@ -25,7 +23,7 @@ import CollectionView from './collectionView';
 // View
 const view: View<State, Actions> = (rootState, rootActions) => (
   <main>
-    <AlertsView />
+    <AlertsView alerts={rootState.alerts} removeAlert={rootActions.removeAlert} />
 
     <Switch>
       <Route
@@ -61,5 +59,6 @@ const view: View<State, Actions> = (rootState, rootActions) => (
 
 const main = withLogger(app)(initialState, actions, view, document.getElementById('app'));
 main.fetchCollections();
+main.addAlert({ text: 'Test Alert', type: 'primary' });
 
 location.subscribe(main.location);
