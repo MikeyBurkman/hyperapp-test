@@ -48,8 +48,8 @@ function formatCollection(col: Collection, navToCollection: (name: string) => an
         </button>
       </td>
       <td>
-        <button class="btn btn-outline-danger">
-          <div style={{ color: '#dc3545' }}>
+        <button class="btn btn-danger">
+          <div style={{ color: 'white' }}>
             <i class="fas fa-trash-alt" />
           </div>
         </button>
