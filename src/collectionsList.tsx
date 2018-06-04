@@ -8,7 +8,6 @@ interface ViewProps {
 }
 
 const view: Component<ViewProps> = ({ collectionList, navToCollection }) => {
-  console.log('Rendering collection list: ', collectionList);
   const val = collectionsList.match(collectionList, {
     error: (str) => <span class="alert alert-danger">Error fetching collections: {str}</span>,
     unfetched: () => (

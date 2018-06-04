@@ -15,7 +15,12 @@ import {
   State
 } from './model';
 
-import { getCollection, getCollectionsList, getDefaultSearchOpts } from './api';
+import {
+  getCollection,
+  getCollectionsList,
+  getDefaultSearchOpts,
+  parseCollectionQueryParams
+} from './api';
 
 export interface Actions {
   // Location
@@ -48,18 +53,15 @@ export const actions: ActionsType<State, Actions> = {
 
     if (currPage.name === 'home') {
       $actions.fetchCollections();
-      setTimeout(() => $actions.updatePage(page.collectionsList(collectionsList.unfetched())), 0);
+      $actions.updatePage(page.collectionsList(collectionsList.unfetched()));
     } else if (currPage.name === 'collection') {
       const name = currPage.pathParams.name;
-      const opts = getDefaultSearchOpts(); // TODO use query params
+      const opts = parseCollectionQueryParams(currPage.queryParams) || getDefaultSearchOpts();
       $actions.search({
         name: name,
         opts: opts
       });
-      setTimeout(
-        () => $actions.updatePage(page.collectionView(collectionView.fetching(name, opts))),
-        0
-      );
+      $actions.updatePage(page.collectionView(collectionView.fetching(name, opts)));
     }
   },
 
@@ -81,10 +83,7 @@ export const actions: ActionsType<State, Actions> = {
   }),
   fetchCollections: () => ($state, a) => {
     return getCollectionsList()
-      .then((cols) => {
-        console.log('Fetched columns: ', cols);
-        a.updateCollections(collectionsList.fetched(cols));
-      })
+      .then((cols) => a.updateCollections(collectionsList.fetched(cols)))
       .catch((err) => a.updateCollections(collectionsList.error(err.message || err.toString())));
   },
 

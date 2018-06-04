@@ -50,7 +50,7 @@ const routerActions: ActionsType<State, Actions> = {
       actions.navigate(window.location.pathname);
     });
     if (opts.onPageChange) {
-      setTimeout(opts.onPageChange, 0);
+      setTimeout(opts.onPageChange);
     }
     return {
       matchers: compiledConfig,
@@ -65,7 +65,7 @@ const routerActions: ActionsType<State, Actions> = {
     }
     window.history.pushState(null, '', path);
     if (state.onChange) {
-      setTimeout(state.onChange, 0);
+      setTimeout(state.onChange);
     }
     return {
       currentPage: match

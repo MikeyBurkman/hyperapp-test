@@ -30,29 +30,23 @@ export function getCollection(name: string, opts: SearchOpts) {
   });
 }
 
-export function parseCollectionSearchQuery(
-  queryString: string
-): { parsed: SearchOpts; str: string } | undefined {
-  if (!queryString) {
+export function parseCollectionQueryParams(queryParams: any): SearchOpts | undefined {
+  if (!queryParams) {
     return undefined;
   }
 
   try {
-    const opts = qs.parse(queryString);
-    const parsed = {
-      start: Number(opts.start) || 0,
-      limit: Number(opts.limit) || 20,
-      query: opts.query ? (JSON.parse(opts.query) as object) : undefined,
-      projection: opts.projection ? (JSON.parse(opts.projection) as object) : undefined,
-      sort: opts.sort ? (JSON.parse(opts.sort) as SearchOpts['sort']) : undefined
-    };
     return {
-      parsed: parsed,
-      str: '?' + qs.stringify(parsed)
+      start: Number(queryParams.start) || 0,
+      limit: Number(queryParams.limit) || 20,
+      query: queryParams.query ? (JSON.parse(queryParams.query) as object) : undefined,
+      projection: queryParams.projection
+        ? (JSON.parse(queryParams.projection) as object)
+        : undefined,
+      sort: queryParams.sort ? (JSON.parse(queryParams.sort) as SearchOpts['sort']) : undefined
     };
   } catch (err) {
-    // tslint:disable-next-line:no-console
-    console.log('Error parsing query string', err);
+    console.warn('Error parsing query string', err);
     return undefined;
   }
 }

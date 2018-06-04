@@ -7,7 +7,6 @@ interface ViewProps {
 }
 
 const view: Component<ViewProps> = ({ collection }) => {
-  console.log('Render collection view: ', collection);
   return collectionView.match(collection, {
     unfetched: () => getProgressBar('bg-info'),
     fetching: (name) => getProgressBar('bg-info', name),
