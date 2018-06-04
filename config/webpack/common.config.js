@@ -17,8 +17,7 @@ module.exports = {
         loader: 'tslint-loader',
         options: {
           failOnHint: true,
-          typeCheck: false, // Enable this and fix occasionally -- they too long to do every time
-          fix: false
+          typeCheck: false // Enable this occasionally -- it takes too long to do every time
         }
       },
       {

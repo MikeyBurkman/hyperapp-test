@@ -1,13 +1,14 @@
-import { Link } from '@hyperapp/router';
 import { Component, h } from 'hyperapp';
 
 import { Collection, collectionsList, CollectionsList } from './model';
 
 interface ViewProps {
   collectionList: CollectionsList;
+  navToCollection: (name: string) => any;
 }
 
-const view: Component<ViewProps> = ({ collectionList }) => {
+const view: Component<ViewProps> = ({ collectionList, navToCollection }) => {
+  console.log('Rendering collection list: ', collectionList);
   const val = collectionsList.match(collectionList, {
     error: (str) => <span class="alert alert-danger">Error fetching collections: {str}</span>,
     unfetched: () => (
@@ -24,7 +25,7 @@ const view: Component<ViewProps> = ({ collectionList }) => {
     ),
     fetched: (collections) => (
       <table class="table">
-        <tbody>{collections.map(formatCollection)}</tbody>
+        <tbody>{collections.map((col) => formatCollection(col, navToCollection))}</tbody>
       </table>
     )
   });
@@ -38,15 +39,17 @@ const view: Component<ViewProps> = ({ collectionList }) => {
 };
 export default view;
 
-function formatCollection(col: Collection) {
+function formatCollection(col: Collection, navToCollection: (name: string) => any) {
   return (
     <tr>
       <td>{col.name}</td>
       <td>
-        <Link to={`/collections/${col.name}`}>View</Link>
+        <button class="btn btn-primary" onclick={() => navToCollection(col.name)}>
+          View
+        </button>
       </td>
       <td>
-        <button>
+        <button class="btn btn-outline-danger">
           <div style={{ color: '#dc3545' }}>
             <i class="fas fa-trash-alt" />
           </div>

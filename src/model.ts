@@ -1,6 +1,6 @@
 import { t, Union } from 'ts-union';
 
-import { location, LocationState } from '@hyperapp/router';
+import { router, State as RouterState } from './router';
 
 // Alerts
 export interface Alert {
@@ -42,28 +42,33 @@ export interface SearchOpts {
 }
 
 export const collectionView = Union({
-  unfetched: t(),
+  unfetched: t<string>(),
   fetching: t<string, SearchOpts>(),
   loaded: t<string, SearchOpts, CollectionSearchResults>(),
-  error: t()
+  error: t<string>()
 });
 
 export type CollectionView = typeof collectionView.T;
 
+export const page = Union({
+  unknown: t(),
+  collectionsList: t<CollectionsList>(),
+  collectionView: t<CollectionView>()
+});
+export type Page = typeof page.T;
+
 // All together now
 
 export interface State {
-  location: LocationState;
+  router: RouterState;
   alertLatestID: number;
   alerts: Alert[];
-  collectionList: CollectionsList;
-  searchResults: CollectionView;
+  page: Page;
 }
 
 export const initialState: State = {
-  location: location.state,
+  router: router.state,
   alertLatestID: 0,
   alerts: [],
-  collectionList: collectionsList.unfetched(),
-  searchResults: collectionView.unfetched()
+  page: page.collectionsList(collectionsList.unfetched())
 };

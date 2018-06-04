@@ -1,6 +1,6 @@
-import { location, LocationActions } from '@hyperapp/router';
 import { ActionsType } from 'hyperapp';
-import * as isEqual from 'lodash.isequal';
+
+import { Actions as RouterActions, router } from './router';
 
 import {
   Alert,
@@ -9,15 +9,19 @@ import {
   collectionsList,
   CollectionView,
   collectionView,
+  page,
+  Page,
   SearchOpts,
   State
 } from './model';
 
-import { getCollection, getCollectionsList } from './api';
+import { getCollection, getCollectionsList, getDefaultSearchOpts } from './api';
 
 export interface Actions {
   // Location
-  location: LocationActions;
+  router: RouterActions;
+  updatePage: (p: Page) => State;
+  onPageChange: () => any;
 
   // Alerts
   addAlert(alert: Pick<Alert, 'text' | 'type'>): State;
@@ -34,7 +38,30 @@ export interface Actions {
 
 export const actions: ActionsType<State, Actions> = {
   // Location
-  location: location.actions,
+  router: router.actions,
+  updatePage: (p: Page) => ({ page: p }),
+  onPageChange: () => ($state, $actions) => {
+    const currPage = $state.router.currentPage;
+    if (!currPage) {
+      return $actions.updatePage(page.unknown());
+    }
+
+    if (currPage.name === 'home') {
+      $actions.fetchCollections();
+      setTimeout(() => $actions.updatePage(page.collectionsList(collectionsList.unfetched())), 0);
+    } else if (currPage.name === 'collection') {
+      const name = currPage.pathParams.name;
+      const opts = getDefaultSearchOpts(); // TODO use query params
+      $actions.search({
+        name: name,
+        opts: opts
+      });
+      setTimeout(
+        () => $actions.updatePage(page.collectionView(collectionView.fetching(name, opts))),
+        0
+      );
+    }
+  },
 
   // Alerts
   addAlert: (alert) => ($state, a) => {
@@ -50,32 +77,22 @@ export const actions: ActionsType<State, Actions> = {
 
   // Collections List
   updateCollections: (list: CollectionsList) => ({
-    collectionList: list
+    page: page.collectionsList(list)
   }),
   fetchCollections: () => ($state, a) => {
-    a.updateCollections(collectionsList.unfetched());
     return getCollectionsList()
-      .then((cols) => a.updateCollections(collectionsList.fetched(cols)))
+      .then((cols) => {
+        console.log('Fetched columns: ', cols);
+        a.updateCollections(collectionsList.fetched(cols));
+      })
       .catch((err) => a.updateCollections(collectionsList.error(err.message || err.toString())));
   },
 
   // Collections View
-  updateCollectionsView: (results: CollectionView) => ({ searchResults: results }),
+  updateCollectionsView: (results: CollectionView) => ({
+    page: page.collectionView(results)
+  }),
   search: ({ name, opts }: { name: string; opts: SearchOpts }) => ($state: State, a: Actions) => {
-    if (
-      collectionView.match($state.searchResults, {
-        // We have to do this because the router doesn't work on the model directly...
-        // No way to really do a proper init, so we might call search repeatedly a lot...
-        // https://github.com/hyperapp/router/issues/53
-        fetching: (prevName, prevOpts) => name === prevName && isEqual(opts, prevOpts),
-        loaded: (prevName, prevOpts) => name === prevName && isEqual(opts, prevOpts),
-        default: () => false
-      })
-    ) {
-      // Already searching with these params
-      return;
-    }
-
     const timestamp = new Date();
     getCollection(name, opts).then((results) => {
       a.updateCollectionsView(collectionView.loaded(name, opts, { results, timestamp }));

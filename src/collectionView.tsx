@@ -7,6 +7,7 @@ interface ViewProps {
 }
 
 const view: Component<ViewProps> = ({ collection }) => {
+  console.log('Render collection view: ', collection);
   return collectionView.match(collection, {
     unfetched: () => getProgressBar('bg-info'),
     fetching: (name) => getProgressBar('bg-info', name),
@@ -53,10 +54,10 @@ function formatResults(collName: string, searchResults: CollectionSearchResults)
     <div>
       {formatCollectionName(collName)}
       <table class="table">
+        <caption>As of {searchResults.timestamp.toString()}</caption>
         {formatHeaders(headers)}
         <tbody>{searchResults.results.map((row) => formatRow(row, headers))}</tbody>
       </table>
-      <h5>As of {searchResults.timestamp.toString()}</h5>
     </div>
   );
 }
