@@ -2,31 +2,21 @@ import * as qs from 'query-string';
 
 import { Collection, SearchOpts } from './model';
 
+import { collections } from './testData';
+
+console.log('Collections: ', collections);
+
 export function getCollectionsList() {
   return new Promise<Collection[]>((resolve) => {
-    const colls = [{ name: 'foo' }, { name: 'bar' }, { name: 'qux' }, { name: 'logs' }];
+    const colls = collections.map((c) => ({ name: c.name }));
     setTimeout(() => resolve(colls), 1200);
   });
 }
 
 export function getCollection(name: string, opts: SearchOpts) {
   return new Promise<object[]>((resolve) => {
-    const data = [
-      {
-        _id: '12345',
-        employeeName: 'Joe Smith',
-        dateHired: '2018-01-01',
-        color: 'blue'
-      },
-      {
-        _id: '99999',
-        employeeName: 'Barbara Walters',
-        dateHired: '2015-06-01',
-        magicNumber: 58
-      }
-    ];
-
-    setTimeout(() => resolve(data), 1200);
+    const coll = collections.find((c) => c.name === name)!;
+    setTimeout(() => resolve(coll.records), 1200);
   });
 }
 
