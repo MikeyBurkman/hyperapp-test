@@ -2,6 +2,8 @@ import { ActionsType } from 'hyperapp';
 
 import { Actions as RouterActions, router } from './router';
 
+import * as qs from 'query-string';
+
 import {
   Alert,
   Collection,
@@ -25,8 +27,8 @@ import {
 export interface Actions {
   // Location
   router: RouterActions;
-  updatePage: (p: Page) => State;
-  onPageChange: () => any;
+  onPageChange(): any;
+  updatePage(p: Page): State;
 
   // Alerts
   addAlert(alert: Pick<Alert, 'text' | 'type'>): State;
@@ -38,32 +40,37 @@ export interface Actions {
 
   // Collections View
   search(params: { name: string; opts: SearchOpts }): State;
-  updateCollectionsView(collectionsView: CollectionView): State;
 }
 
 export const actions: ActionsType<State, Actions> = {
   // Location
   router: router.actions,
-  updatePage: (p: Page) => ({ page: p }),
   onPageChange: () => ($state, $actions) => {
     const currPage = $state.router.currentPage;
     if (!currPage) {
-      return $actions.updatePage(page.unknown());
+      return {
+        page: page.unknown()
+      };
     }
 
     if (currPage.name === 'home') {
       $actions.fetchCollections();
-      $actions.updatePage(page.collectionsList(collectionsList.unfetched()));
+      return {
+        page: page.collectionsList(collectionsList.unfetched())
+      };
     } else if (currPage.name === 'collection') {
       const name = currPage.pathParams.name;
       const opts = parseCollectionQueryParams(currPage.queryParams) || getDefaultSearchOpts();
-      $actions.search({
-        name: name,
-        opts: opts
+      const timestamp = new Date();
+      getCollection(name, opts).then((results) => {
+        $actions.updatePage(
+          page.collectionView(name, opts, collectionView.loaded({ results, timestamp }))
+        );
       });
-      $actions.updatePage(page.collectionView(collectionView.fetching(name, opts)));
+      $actions.updatePage(page.collectionView(name, opts, collectionView.fetching()));
     }
   },
+  updatePage: (p: Page) => ({ page: p }),
 
   // Alerts
   addAlert: (alert) => ($state, a) => {
@@ -88,16 +95,13 @@ export const actions: ActionsType<State, Actions> = {
   },
 
   // Collections View
-  updateCollectionsView: (results: CollectionView) => ({
-    page: page.collectionView(results)
-  }),
   search: ({ name, opts }: { name: string; opts: SearchOpts }) => ($state: State, a: Actions) => {
-    const timestamp = new Date();
-    getCollection(name, opts).then((results) => {
-      a.updateCollectionsView(collectionView.loaded(name, opts, { results, timestamp }));
-    });
-    return {
-      searchResults: collectionView.fetching(name, opts)
+    const formatted = {
+      start: opts.start,
+      limit: opts.limit,
+      query: opts.query && JSON.stringify(opts.query),
+      projection: opts.projection && JSON.stringify(opts.projection)
     };
+    a.router.navigate(`/collections/${name}?${qs.stringify(formatted)}`);
   }
 };

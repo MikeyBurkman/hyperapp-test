@@ -2,7 +2,7 @@ import { withLogger } from '@hyperapp/logger';
 import { app, h, View } from 'hyperapp';
 
 import { Actions, actions } from './actions';
-import { initialState, page, State } from './model';
+import { initialState, page, SearchOpts, State } from './model';
 
 import AlertsView from './alerts';
 import BreadCrumbs from './breadcrumbs';
@@ -23,7 +23,7 @@ const main = withLogger(app)(initialState, actions, view, document.getElementByI
 main.addAlert({ text: 'Test Alert', type: 'primary' });
 main.router.init({
   config: [['collection', '/collections/:name'], ['home', '/']],
-  onPageChange: () => main.onPageChange()
+  onPageChange: main.onPageChange
 });
 
 function App({ state, a }: { state: State; a: any }) {
@@ -35,6 +35,13 @@ function App({ state, a }: { state: State; a: any }) {
         navToCollection={(name: string) => main.router.navigate(`/collections/${name}`)}
       />
     ),
-    collectionView: (coll) => <CollectionView collection={coll} />
+    collectionView: (name, opts, coll) => (
+      <CollectionView
+        name={name}
+        opts={opts}
+        collection={coll}
+        onSearch={(newOpts: SearchOpts) => main.search({ name, opts: newOpts })}
+      />
+    )
   });
 }

@@ -1,14 +1,37 @@
 import lorem from 'lorem-ipsum';
 import * as seedrandom from 'seedrandom';
 
+import { SearchOpts } from './model';
+
 const rng = seedrandom('test');
 
-export const collections = ['COLLECTION_1', 'COLLECTION_2', 'COLLECTION_3', 'COLLECTION_4'].map(
-  (n) => ({
-    name: n,
-    records: generateRandomRecords()
-  })
-);
+const collections = ['COLLECTION_1', 'COLLECTION_2', 'COLLECTION_3', 'COLLECTION_4'].map((n) => ({
+  name: n,
+  records: generateRandomRecords()
+}));
+
+export function collectionNames() {
+  return collections.map((c) => ({ name: c.name }));
+}
+
+export function search(name: string, opts: SearchOpts): any[] {
+  const coll = collections.find((c) => c.name === name)!;
+  const records = coll.records.filter((r) => {
+    const q = opts.query;
+
+    if (q) {
+      for (const k in q) {
+        if (r[k] !== q[k]) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  });
+
+  return records.slice(opts.start, opts.start + opts.limit);
+}
 
 function generateRandomRecords() {
   const count = genInt(30) + 10;
@@ -18,16 +41,14 @@ function generateRandomRecords() {
     headers.push(genString());
   }
 
-  const records: object[] = [];
+  const records: any[] = [];
   for (let i = 0; i < count; i += 1) {
     const r: any = {
-      _id: genString()
+      _id: genObjectID()
     };
     for (const h of headers) {
       if (genInt(10) > 2) {
         r[h] = genString();
-      } else {
-        r[h] = undefined;
       }
     }
     records.push(r);
@@ -46,4 +67,12 @@ function genString(): string {
     units: 'words',
     random: rng
   });
+}
+
+function genObjectID(): string {
+  const r: string[] = [];
+  for (let i = 0; i < 12; i += 1) {
+    r.push(genInt(16).toString(16));
+  }
+  return r.join('');
 }

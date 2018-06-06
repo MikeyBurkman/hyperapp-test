@@ -45,7 +45,7 @@ const initialState: State = {
 const routerActions: ActionsType<State, Actions> = {
   init: (opts: InitOpts) => (state: State, actions: Actions) => {
     const compiledConfig = compileConfig(opts.config);
-    const match = parsePath(compiledConfig, window.location.pathname);
+    const match = parsePath(compiledConfig, window.location.pathname + window.location.search);
     addEventListener('popstate', () => {
       actions.navigate(window.location.pathname);
     });
@@ -99,11 +99,12 @@ function compileConfig(config: RouterConfig): CompiledMatcher[] {
   });
 }
 
-function parsePath(matchers: CompiledMatcher[], path: string): RouteMatch | null {
+function parsePath(matchers: CompiledMatcher[], fullPath: string): RouteMatch | null {
+  const [path, search] = fullPath.split('?');
   for (const matcher of matchers) {
     const m = matcher.regexp.exec(path);
     if (m) {
-      const queryParams = qs.parse(window.location.search);
+      const queryParams = qs.parse(search);
       const pathKeyMatches = m.slice(1);
       const pathParams: any = {};
       matcher.keys.forEach((key, idx) => {
@@ -111,7 +112,7 @@ function parsePath(matchers: CompiledMatcher[], path: string): RouteMatch | null
       });
       return {
         name: matcher.name,
-        path: path,
+        path: fullPath,
         pathParams: pathParams,
         queryParams: queryParams
       };

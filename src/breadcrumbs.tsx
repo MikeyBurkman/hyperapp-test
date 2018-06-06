@@ -17,14 +17,7 @@ const view: Component<ViewProps, State> = ({ navigate }) => (state) => {
         active: true
       }
     ],
-    collectionView: (coll) => {
-      const currColName = collectionView.match(coll, {
-        error: (name) => name,
-        fetching: (name) => name,
-        loaded: (name) => name,
-        unfetched: () => null
-      });
-
+    collectionView: (name, coll) => {
       return [
         {
           name: 'Home',
@@ -32,7 +25,7 @@ const view: Component<ViewProps, State> = ({ navigate }) => (state) => {
           active: false
         },
         {
-          name: currColName || 'Fetching...',
+          name: name,
           to: '',
           active: true
         }

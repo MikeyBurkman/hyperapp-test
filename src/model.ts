@@ -33,8 +33,8 @@ export interface CollectionSearchResults {
 export interface SearchOpts {
   start: number;
   limit: number;
-  query?: object;
-  projection?: object;
+  query?: any;
+  projection?: any;
   sort?: {
     col: string;
     order: 'ASC' | 'DESC';
@@ -42,10 +42,9 @@ export interface SearchOpts {
 }
 
 export const collectionView = Union({
-  unfetched: t<string>(),
-  fetching: t<string, SearchOpts>(),
-  loaded: t<string, SearchOpts, CollectionSearchResults>(),
-  error: t<string>()
+  fetching: t(),
+  loaded: t<CollectionSearchResults>(),
+  error: t()
 });
 
 export type CollectionView = typeof collectionView.T;
@@ -53,7 +52,7 @@ export type CollectionView = typeof collectionView.T;
 export const page = Union({
   unknown: t(),
   collectionsList: t<CollectionsList>(),
-  collectionView: t<CollectionView>()
+  collectionView: t<string, SearchOpts, CollectionView>()
 });
 export type Page = typeof page.T;
 
