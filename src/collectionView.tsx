@@ -214,11 +214,11 @@ function getPagination(
   results: CollectionSearchResults,
   onPageSelect: (page: number) => any
 ) {
-  const maxPages = 8; // Maximum to display at one time
   const numPages = Math.ceil(results.total / opts.pageSize);
+  const maxPages = 8; // Maximum to display at one time
 
   const pageEle = (idx: number, active: boolean, disabled: boolean, label?: string) => {
-    const cls = `page-item ${active ? 'active' : ''} ${disabled ? 'disabled' : ''}`;
+    const cls = `page-item ${active && 'active'} ${disabled && 'disabled'}`;
     const onClick = () => onPageSelect(idx);
     return (
       <li class={cls}>
@@ -231,7 +231,7 @@ function getPagination(
 
   const [startPage, endPage] = (() => {
     if (opts.page < maxPages / 2) {
-      return [0, maxPages];
+      return [0, Math.min(maxPages, numPages)];
     } else if (opts.page > numPages - maxPages / 2) {
       return [numPages - maxPages, numPages];
     } else {
@@ -241,11 +241,18 @@ function getPagination(
 
   const pages = R.range(startPage, endPage).map((idx) => pageEle(idx, idx === opts.page, false));
 
-  if (startPage > 0) {
+  // Add the first/last page buttons
+  if (startPage === 1) {
+    // Logic is slightly funky on these, because we only want to show the `...` if we're skipping pages
+    pages.unshift(pageEle(0, false, false));
+  } else if (startPage > 1) {
     pages.unshift(pageEle(0, false, false, '1...'));
   }
 
-  if (endPage < numPages) {
+  if (endPage === numPages - 1) {
+    // Logic is slightly funky on these, because we only want to show the `...` if we're skipping pages
+    pages.push(pageEle(numPages - 1, false, false));
+  } else if (endPage < numPages - 1) {
     pages.push(pageEle(numPages - 1, false, false, `...${numPages}`));
   }
 
