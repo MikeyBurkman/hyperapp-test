@@ -40,7 +40,6 @@ function App({ state, a }: { state: State; a: any }) {
         opts={opts}
         collection={collectionView}
         updateOpts={main.updateSearchOpts}
-        onSearch={main.search}
         onAlert={main.addAlert}
       />
     )

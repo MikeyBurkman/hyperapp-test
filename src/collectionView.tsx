@@ -1,4 +1,5 @@
 import { Component, h } from 'hyperapp';
+import * as R from 'ramda';
 
 import {
   CollectionSearchResults,
@@ -14,15 +15,14 @@ interface ViewProps {
   name: string;
   opts: SearchOpts;
   collection: CollectionView;
-  onSearch: () => any;
   onAlert: (alert: NewAlert) => any;
   updateOpts: (newOpts: SearchOpts) => any;
 }
 
-const view: Component<ViewProps> = ({ name, opts, collection, onSearch, onAlert, updateOpts }) => {
+const view: Component<ViewProps> = ({ name, opts, collection, onAlert, updateOpts }) => {
   const body = collectionView.match(collection, {
     fetching: () => <div>{getProgressBar('bg-info')}</div>,
-    loaded: (results) => <div>{formatResults(name, results)}</div>,
+    loaded: (results) => <div>{formatResults(name, results, opts, updateOpts)}</div>,
     error: () => <div>{getProgressBar('bg-danger')}</div>
   });
 
@@ -32,7 +32,7 @@ const view: Component<ViewProps> = ({ name, opts, collection, onSearch, onAlert,
         <div class="col">{formatCollectionName(name)}</div>
       </div>
       <div class="row">
-        <div class="col">{getForm(opts, updateOpts, onSearch, onAlert)}</div>
+        <div class="col">{getForm(opts, updateOpts, onAlert)}</div>
       </div>
       <div class="row">
         <div class="col">{body}</div>
@@ -62,14 +62,34 @@ function formatCollectionName(collName: string) {
   return <h2>{collName}</h2>;
 }
 
-function formatResults(collName: string, searchResults: CollectionSearchResults) {
+function formatResults(
+  collName: string,
+  searchResults: CollectionSearchResults,
+  opts: SearchOpts,
+  onOptsUpdate: (opts: SearchOpts) => any
+) {
+  const onPageChange = (n: number) =>
+    onOptsUpdate(
+      Object.assign({}, opts, {
+        page: n
+      })
+    );
   const headers = getHeaders(searchResults.results);
+  const start = opts.page * opts.pageSize;
+  const end = Math.min(start + opts.pageSize, searchResults.total);
+  const caption = `Showing ${start} - ${end} of ${
+    searchResults.total
+  } records, as of ${searchResults.timestamp.toString()}`;
   return (
-    <table class="table my-2">
-      <caption>As of {searchResults.timestamp.toString()}</caption>
-      {formatHeaders(headers)}
-      <tbody>{searchResults.results.map((row) => formatRow(row, headers))}</tbody>
-    </table>
+    <div>
+      {getPagination(opts, searchResults, onPageChange)}
+      <table class="table my-2">
+        <caption>{caption}</caption>
+        {formatHeaders(headers)}
+        <tbody>{searchResults.results.map((row) => formatRow(row, headers))}</tbody>
+      </table>
+      {getPagination(opts, searchResults, onPageChange)}
+    </div>
   );
 }
 
@@ -108,7 +128,6 @@ function formatRow(row: any, headers: string[]) {
 function getForm(
   opts: SearchOpts,
   onOptsUpdate: (opts: SearchOpts) => any,
-  search: () => any,
   alert: (alert: NewAlert) => any
 ) {
   const query = opts && opts.query && JSON.stringify(opts.query, null, 2);
@@ -190,13 +209,85 @@ function getForm(
           </label>
         </div>
       </div>
-      <div class="row">
-        <div class="col">
-          <button class="btn btn-primary" onclick={search}>
-            Search
-          </button>
-        </div>
-      </div>
     </div>
+  );
+}
+
+function getPagination(
+  opts: SearchOpts,
+  results: CollectionSearchResults,
+  onPageSelect: (page: number) => any
+) {
+  const maxPages = 8; // Maximum to display at one time
+  const numPages = Math.ceil(results.total / opts.pageSize);
+  const onFirst = opts.page === 0;
+  const onLast = opts.page === numPages - 1;
+
+  const [startPage, endPage] = (() => {
+    if (opts.page < maxPages / 2) {
+      return [0, maxPages];
+    } else if (opts.page > numPages - maxPages / 2) {
+      return [numPages - maxPages, numPages];
+    } else {
+      return [opts.page - maxPages / 2, opts.page + maxPages / 2];
+    }
+  })();
+
+  const pages = R.range(startPage, endPage).map((idx) => {
+    const active = idx === opts.page;
+    const cls = `page-item ${active ? 'active' : ''}`;
+    const onClick = () => onPageSelect(idx);
+    return (
+      <li class={cls}>
+        <a class="page-link" onclick={onClick}>
+          {idx + 1}
+        </a>
+      </li>
+    );
+  });
+
+  if (startPage > 0) {
+    pages.unshift(
+      <li class="page-item">
+        <a class="page-link" onclick={() => onPageSelect(0)}>
+          1...
+        </a>
+      </li>
+    );
+  }
+
+  if (endPage < numPages) {
+    pages.push(
+      <li class="page-item">
+        <a class="page-link" onclick={() => onPageSelect(numPages - 1)}>
+          ...{numPages}
+        </a>
+      </li>
+    );
+  }
+
+  const prev = (
+    <li class={`page-item ${onFirst ? 'disabled' : ''}`}>
+      <a class="page-link" onclick={() => onPageSelect(opts.page - 1)}>
+        Previous
+      </a>
+    </li>
+  );
+  const next = (
+    <li class={`page-item ${onLast ? 'disabled' : ''}`}>
+      <a class="page-link" onclick={() => onPageSelect(opts.page + 1)}>
+        Next
+      </a>
+    </li>
+  );
+
+  return (
+    <nav aria-label="Page navigation example">
+      <ul class="pagination">
+        {prev}
+        {pages}
+        {next}
+      </ul>
+    </nav>
   );
 }

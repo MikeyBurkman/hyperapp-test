@@ -44,13 +44,14 @@ function generateRandomRecords() {
 
   const headers: string[] = [];
   for (let i = 0; i < 8; i += 1) {
-    headers.push(genString());
+    headers.push(genString().toLowerCase());
   }
 
   const records: any[] = [];
   for (let i = 0; i < count; i += 1) {
     const r: any = {
-      _id: genObjectID()
+      _id: genObjectID(),
+      _index: i + 1
     };
     for (const h of headers) {
       if (genInt(10) > 2) {

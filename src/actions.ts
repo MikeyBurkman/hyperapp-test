@@ -40,7 +40,7 @@ export interface Actions {
   fetchCollections(): Promise<Collection[]>;
 
   // Collections View
-  search(params: { name: string; opts: SearchOpts }): State;
+  search(): State;
   updateSearchOpts(opts: SearchOpts): State;
 }
 
@@ -139,6 +139,7 @@ export const actions: ActionsType<State, Actions> = {
         return $state.page;
       }
     });
-    return $actions.updatePage(p);
+    $actions.updatePage(p);
+    setTimeout(() => $actions.search());
   }
 };
