@@ -1,5 +1,3 @@
-import * as qs from 'query-string';
-
 import { Collection, CollectionSearchResults, SearchOpts } from './model';
 
 import { collectionNames, search } from './testData';

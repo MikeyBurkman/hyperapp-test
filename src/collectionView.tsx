@@ -9,8 +9,6 @@ import {
   SearchOpts
 } from './model';
 
-import { getDefaultSearchOpts } from './api';
-
 interface ViewProps {
   name: string;
   opts: SearchOpts;
@@ -134,8 +132,6 @@ function getForm(
   const projection = opts && opts.projection && JSON.stringify(opts.projection, null, 2);
   const pageSize = opts && opts.pageSize;
   const pageSizeOpt = (size: number) => <option value={size}>{size}</option>;
-
-  const newOpts = Object.assign({}, opts); // Mutable version of opts that will be used when we click search
 
   const onQueryChange = (text: string) => {
     try {

@@ -9,7 +9,6 @@ import {
   Collection,
   CollectionsList,
   collectionsList,
-  CollectionView,
   collectionView,
   NewAlert,
   page,

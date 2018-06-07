@@ -1,6 +1,6 @@
 import { Component, h } from 'hyperapp';
 
-import { collectionView, page, State } from './model';
+import { page, State } from './model';
 import { Link } from './router';
 
 interface ViewProps {

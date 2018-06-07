@@ -2,7 +2,7 @@ import { withLogger } from '@hyperapp/logger';
 import { app, h, View } from 'hyperapp';
 
 import { Actions, actions } from './actions';
-import { initialState, page, SearchOpts, State } from './model';
+import { initialState, page, State } from './model';
 
 import AlertsView from './alerts';
 import BreadCrumbs from './breadcrumbs';
