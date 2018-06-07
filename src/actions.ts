@@ -63,13 +63,12 @@ export const actions: ActionsType<State, Actions> = {
     } else if (currPage.name === 'collection') {
       const name = currPage.pathParams.name;
       const opts = parseCollectionQueryParams(currPage.queryParams) || getDefaultSearchOpts();
-      const timestamp = new Date();
       getCollection(name, opts).then((results) => {
         $actions.updatePage(
           page.collectionView({
             name,
             opts: opts,
-            collectionView: collectionView.loaded({ results, timestamp })
+            collectionView: collectionView.loaded(results)
           })
         );
       });
@@ -119,8 +118,8 @@ export const actions: ActionsType<State, Actions> = {
 
     const searchOpts = opts.opts;
     const formatted = {
-      start: searchOpts.start,
-      limit: searchOpts.limit,
+      page: searchOpts.page,
+      pageSize: searchOpts.pageSize,
       query: searchOpts.query && JSON.stringify(searchOpts.query),
       projection: searchOpts.projection && JSON.stringify(searchOpts.projection)
     };

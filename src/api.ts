@@ -1,6 +1,6 @@
 import * as qs from 'query-string';
 
-import { Collection, SearchOpts } from './model';
+import { Collection, CollectionSearchResults, SearchOpts } from './model';
 
 import { collectionNames, search } from './testData';
 
@@ -10,8 +10,8 @@ export function getCollectionsList() {
   });
 }
 
-export function getCollection(name: string, opts: SearchOpts) {
-  return new Promise<object[]>((resolve) => {
+export function getCollection(name: string, opts: SearchOpts): Promise<CollectionSearchResults> {
+  return new Promise<CollectionSearchResults>((resolve) => {
     setTimeout(() => resolve(search(name, opts)), 600);
   });
 }
@@ -23,13 +23,14 @@ export function parseCollectionQueryParams(queryParams: any): SearchOpts | undef
 
   try {
     return {
-      start: Number(queryParams.start) || 0,
-      limit: Number(queryParams.limit) || 20,
+      page: Number(queryParams.page) || 0,
+      pageSize: Number(queryParams.pageSize) || 20,
       query: queryParams.query ? (JSON.parse(queryParams.query) as object) : undefined,
       projection: queryParams.projection
         ? (JSON.parse(queryParams.projection) as object)
         : undefined,
-      sort: queryParams.sort ? (JSON.parse(queryParams.sort) as SearchOpts['sort']) : undefined
+      sortCol: queryParams.sortCol || undefined,
+      sortOrder: queryParams.sortOrder || undefined
     };
   } catch (err) {
     console.warn('Error parsing query string', err);
@@ -39,14 +40,7 @@ export function parseCollectionQueryParams(queryParams: any): SearchOpts | undef
 
 export function getDefaultSearchOpts(): SearchOpts {
   return {
-    start: 0,
-    limit: 20
-    /*query: {
-      ad: 'cupidatat'
-    }*/
+    page: 0,
+    pageSize: 20
   };
-}
-
-export function getDefaultCollectionSearchString() {
-  return '?' + qs.stringify(getDefaultSearchOpts());
 }

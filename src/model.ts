@@ -27,19 +27,18 @@ export type CollectionsList = typeof collectionsList.T;
 // Collections View
 
 export interface CollectionSearchResults {
-  results: object[];
+  results: object[]; // Length is at most `limit`
+  total: number; // Total number of records, ignoring `limit`
   timestamp: Date;
 }
 
 export interface SearchOpts {
-  start: number;
-  limit: number;
+  page: number;
+  pageSize: number;
   query?: any;
   projection?: any;
-  sort?: {
-    col: string;
-    order: 'ASC' | 'DESC';
-  };
+  sortCol?: string;
+  sortOrder?: 'ASC' | 'DESC';
 }
 
 export const collectionView = Union({

@@ -113,7 +113,7 @@ function getForm(
 ) {
   const query = opts && opts.query && JSON.stringify(opts.query, null, 2);
   const projection = opts && opts.projection && JSON.stringify(opts.projection, null, 2);
-  const pageSize = opts && opts.limit;
+  const pageSize = opts && opts.pageSize;
   const pageSizeOpt = (size: number) => <option value={size}>{size}</option>;
 
   const newOpts = Object.assign({}, opts); // Mutable version of opts that will be used when we click search
@@ -139,7 +139,12 @@ function getForm(
     }
   };
   const onPageSizeChange = (value: number) => {
-    onOptsUpdate(Object.assign({}, opts, { limit: value }));
+    onOptsUpdate(
+      Object.assign({}, opts, {
+        page: 0,
+        pageSize: value
+      })
+    );
   };
 
   return (

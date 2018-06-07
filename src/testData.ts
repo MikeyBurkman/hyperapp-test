@@ -1,7 +1,7 @@
 import lorem from 'lorem-ipsum';
 import * as seedrandom from 'seedrandom';
 
-import { SearchOpts } from './model';
+import { CollectionSearchResults, SearchOpts } from './model';
 
 const rng = seedrandom('test');
 
@@ -14,7 +14,7 @@ export function collectionNames() {
   return collections.map((c) => ({ name: c.name }));
 }
 
-export function search(name: string, opts: SearchOpts): any[] {
+export function search(name: string, opts: SearchOpts): CollectionSearchResults {
   const coll = collections.find((c) => c.name === name)!;
   const records = coll.records.filter((r) => {
     const q = opts.query;
@@ -30,11 +30,17 @@ export function search(name: string, opts: SearchOpts): any[] {
     return true;
   });
 
-  return records.slice(opts.start, opts.start + opts.limit);
+  const start = opts.page * opts.pageSize;
+  const page = records.slice(start, start + opts.pageSize);
+  return {
+    results: page,
+    total: records.length,
+    timestamp: new Date()
+  };
 }
 
 function generateRandomRecords() {
-  const count = genInt(30) + 10;
+  const count = genInt(150) + 30;
 
   const headers: string[] = [];
   for (let i = 0; i < 8; i += 1) {
