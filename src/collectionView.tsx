@@ -220,8 +220,18 @@ function getPagination(
 ) {
   const maxPages = 8; // Maximum to display at one time
   const numPages = Math.ceil(results.total / opts.pageSize);
-  const onFirst = opts.page === 0;
-  const onLast = opts.page === numPages - 1;
+
+  const pageEle = (idx: number, active: boolean, disabled: boolean, label?: string) => {
+    const cls = `page-item ${active ? 'active' : ''} ${disabled ? 'disabled' : ''}`;
+    const onClick = () => onPageSelect(idx);
+    return (
+      <li class={cls}>
+        <a class="page-link" onclick={onClick}>
+          {label || idx + 1}
+        </a>
+      </li>
+    );
+  };
 
   const [startPage, endPage] = (() => {
     if (opts.page < maxPages / 2) {
@@ -233,53 +243,18 @@ function getPagination(
     }
   })();
 
-  const pages = R.range(startPage, endPage).map((idx) => {
-    const active = idx === opts.page;
-    const cls = `page-item ${active ? 'active' : ''}`;
-    const onClick = () => onPageSelect(idx);
-    return (
-      <li class={cls}>
-        <a class="page-link" onclick={onClick}>
-          {idx + 1}
-        </a>
-      </li>
-    );
-  });
+  const pages = R.range(startPage, endPage).map((idx) => pageEle(idx, idx === opts.page, false));
 
   if (startPage > 0) {
-    pages.unshift(
-      <li class="page-item">
-        <a class="page-link" onclick={() => onPageSelect(0)}>
-          1...
-        </a>
-      </li>
-    );
+    pages.unshift(pageEle(0, false, false, '1...'));
   }
 
   if (endPage < numPages) {
-    pages.push(
-      <li class="page-item">
-        <a class="page-link" onclick={() => onPageSelect(numPages - 1)}>
-          ...{numPages}
-        </a>
-      </li>
-    );
+    pages.push(pageEle(numPages - 1, false, false, `...${numPages}`));
   }
 
-  const prev = (
-    <li class={`page-item ${onFirst ? 'disabled' : ''}`}>
-      <a class="page-link" onclick={() => onPageSelect(opts.page - 1)}>
-        Previous
-      </a>
-    </li>
-  );
-  const next = (
-    <li class={`page-item ${onLast ? 'disabled' : ''}`}>
-      <a class="page-link" onclick={() => onPageSelect(opts.page + 1)}>
-        Next
-      </a>
-    </li>
-  );
+  const prev = pageEle(opts.page - 1, false, opts.page === 0, 'Previous');
+  const next = pageEle(opts.page + 1, false, opts.page === numPages - 1, 'Next');
 
   return (
     <nav aria-label="Page navigation example">
