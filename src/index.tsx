@@ -20,7 +20,6 @@ const view: View<State, Actions> = (rootState, rootActions) => (
 );
 
 const main = withLogger(app)(initialState, actions, view, document.getElementById('app'));
-main.addAlert({ text: 'Test Alert', type: 'primary' });
 main.router.init({
   config: [['collection', '/collections/:name'], ['home', '/']],
   onPageChange: main.onPageChange
@@ -35,12 +34,14 @@ function App({ state, a }: { state: State; a: any }) {
         navToCollection={(name: string) => main.router.navigate(`/collections/${name}`)}
       />
     ),
-    collectionView: (name, opts, coll) => (
+    collectionView: ({ name, opts, collectionView }) => (
       <CollectionView
         name={name}
         opts={opts}
-        collection={coll}
-        onSearch={(newOpts: SearchOpts) => main.search({ name, opts: newOpts })}
+        collection={collectionView}
+        updateOpts={main.updateSearchOpts}
+        onSearch={main.search}
+        onAlert={main.addAlert}
       />
     )
   });

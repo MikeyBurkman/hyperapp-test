@@ -11,6 +11,7 @@ import {
   collectionsList,
   CollectionView,
   collectionView,
+  NewAlert,
   page,
   Page,
   SearchOpts,
@@ -31,7 +32,7 @@ export interface Actions {
   updatePage(p: Page): State;
 
   // Alerts
-  addAlert(alert: Pick<Alert, 'text' | 'type'>): State;
+  addAlert(alert: NewAlert): State;
   removeAlert(alertID: number): State;
 
   // Collections List
@@ -40,6 +41,7 @@ export interface Actions {
 
   // Collections View
   search(params: { name: string; opts: SearchOpts }): State;
+  updateSearchOpts(opts: SearchOpts): State;
 }
 
 export const actions: ActionsType<State, Actions> = {
@@ -64,10 +66,20 @@ export const actions: ActionsType<State, Actions> = {
       const timestamp = new Date();
       getCollection(name, opts).then((results) => {
         $actions.updatePage(
-          page.collectionView(name, opts, collectionView.loaded({ results, timestamp }))
+          page.collectionView({
+            name,
+            opts: opts,
+            collectionView: collectionView.loaded({ results, timestamp })
+          })
         );
       });
-      $actions.updatePage(page.collectionView(name, opts, collectionView.fetching()));
+      $actions.updatePage(
+        page.collectionView({
+          name: name,
+          opts: opts,
+          collectionView: collectionView.fetching()
+        })
+      );
     }
   },
   updatePage: (p: Page) => ({ page: p }),
@@ -95,13 +107,39 @@ export const actions: ActionsType<State, Actions> = {
   },
 
   // Collections View
-  search: ({ name, opts }: { name: string; opts: SearchOpts }) => ($state: State, a: Actions) => {
+  search: () => ($state: State, a: Actions) => {
+    const opts = page.match($state.page, {
+      collectionView: (params) => params,
+      default: () => null
+    });
+    if (!opts) {
+      console.warn('Trying to run search when not on the collection page. Probably a bug');
+      return undefined;
+    }
+
+    const searchOpts = opts.opts;
     const formatted = {
-      start: opts.start,
-      limit: opts.limit,
-      query: opts.query && JSON.stringify(opts.query),
-      projection: opts.projection && JSON.stringify(opts.projection)
+      start: searchOpts.start,
+      limit: searchOpts.limit,
+      query: searchOpts.query && JSON.stringify(searchOpts.query),
+      projection: searchOpts.projection && JSON.stringify(searchOpts.projection)
     };
-    a.router.navigate(`/collections/${name}?${qs.stringify(formatted)}`);
+    a.router.navigate(`/collections/${opts.name}?${qs.stringify(formatted)}`);
+  },
+  updateSearchOpts: (opts: SearchOpts) => ($state: State, $actions: Actions) => {
+    const p = page.match($state.page, {
+      collectionView: (params) =>
+        page.collectionView({
+          ...params,
+          opts: opts
+        }),
+      default: () => {
+        console.warn(
+          'Trying to update search opts when not on the collection page. Probably a bug'
+        );
+        return $state.page;
+      }
+    });
+    return $actions.updatePage(p);
   }
 };

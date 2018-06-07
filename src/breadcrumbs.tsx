@@ -17,7 +17,7 @@ const view: Component<ViewProps, State> = ({ navigate }) => (state) => {
         active: true
       }
     ],
-    collectionView: (name, coll) => {
+    collectionView: ({ name }) => {
       return [
         {
           name: 'Home',

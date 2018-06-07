@@ -8,6 +8,7 @@ export interface Alert {
   text: string;
   type: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info';
 }
+export type NewAlert = Pick<Alert, 'text' | 'type'>;
 
 // Collections List
 
@@ -49,10 +50,16 @@ export const collectionView = Union({
 
 export type CollectionView = typeof collectionView.T;
 
+export interface CollectionViewData {
+  name: string;
+  opts: SearchOpts;
+  collectionView: CollectionView;
+}
+
 export const page = Union({
   unknown: t(),
   collectionsList: t<CollectionsList>(),
-  collectionView: t<string, SearchOpts, CollectionView>()
+  collectionView: t<CollectionViewData>()
 });
 export type Page = typeof page.T;
 

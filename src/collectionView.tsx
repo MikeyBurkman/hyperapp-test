@@ -1,6 +1,12 @@
 import { Component, h } from 'hyperapp';
 
-import { CollectionSearchResults, collectionView, CollectionView, SearchOpts } from './model';
+import {
+  CollectionSearchResults,
+  collectionView,
+  CollectionView,
+  NewAlert,
+  SearchOpts
+} from './model';
 
 import { getDefaultSearchOpts } from './api';
 
@@ -8,10 +14,12 @@ interface ViewProps {
   name: string;
   opts: SearchOpts;
   collection: CollectionView;
-  onSearch: (opts: SearchOpts) => any;
+  onSearch: () => any;
+  onAlert: (alert: NewAlert) => any;
+  updateOpts: (newOpts: SearchOpts) => any;
 }
 
-const view: Component<ViewProps> = ({ name, opts, collection, onSearch }) => {
+const view: Component<ViewProps> = ({ name, opts, collection, onSearch, onAlert, updateOpts }) => {
   const body = collectionView.match(collection, {
     fetching: () => <div>{getProgressBar('bg-info')}</div>,
     loaded: (results) => <div>{formatResults(name, results)}</div>,
@@ -20,9 +28,15 @@ const view: Component<ViewProps> = ({ name, opts, collection, onSearch }) => {
 
   return (
     <div class="container">
-      <div class="row">{formatCollectionName(name)}</div>
-      <div class="row">{getForm(opts, (newOpts) => onSearch(newOpts))}</div>
-      <div class="row">{body}</div>
+      <div class="row">
+        <div class="col">{formatCollectionName(name)}</div>
+      </div>
+      <div class="row">
+        <div class="col">{getForm(opts, updateOpts, onSearch, onAlert)}</div>
+      </div>
+      <div class="row">
+        <div class="col">{body}</div>
+      </div>
     </div>
   );
 };
@@ -31,39 +45,31 @@ export default view;
 function getProgressBar(type: string) {
   const c = `progress-bar progress-bar-striped progress-bar-animated ${type}`;
   return (
-    <div class="col">
-      <div class="progress">
-        <div
-          class={c}
-          role="progressbar"
-          aria-valuenow="100"
-          aria-valuemin="0"
-          aria-valuemax="100"
-          style={{ width: '100%' }}
-        />
-      </div>
+    <div class="progress mt-5">
+      <div
+        class={c}
+        role="progressbar"
+        aria-valuenow="100"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        style={{ width: '100%' }}
+      />
     </div>
   );
 }
 
 function formatCollectionName(collName: string) {
-  return (
-    <div class="col">
-      <h2>{collName}</h2>
-    </div>
-  );
+  return <h2>{collName}</h2>;
 }
 
 function formatResults(collName: string, searchResults: CollectionSearchResults) {
   const headers = getHeaders(searchResults.results);
   return (
-    <div class="col">
-      <table class="table">
-        <caption>As of {searchResults.timestamp.toString()}</caption>
-        {formatHeaders(headers)}
-        <tbody>{searchResults.results.map((row) => formatRow(row, headers))}</tbody>
-      </table>
-    </div>
+    <table class="table my-2">
+      <caption>As of {searchResults.timestamp.toString()}</caption>
+      {formatHeaders(headers)}
+      <tbody>{searchResults.results.map((row) => formatRow(row, headers))}</tbody>
+    </table>
   );
 }
 
@@ -99,26 +105,45 @@ function formatRow(row: any, headers: string[]) {
   return <tr>{vals.map((v) => <td>{v}</td>)}</tr>;
 }
 
-function getForm(opts: SearchOpts, search: (opts: SearchOpts) => any) {
+function getForm(
+  opts: SearchOpts,
+  onOptsUpdate: (opts: SearchOpts) => any,
+  search: () => any,
+  alert: (alert: NewAlert) => any
+) {
   const query = opts && opts.query && JSON.stringify(opts.query, null, 2);
   const projection = opts && opts.projection && JSON.stringify(opts.projection, null, 2);
   const pageSize = opts && opts.limit;
   const pageSizeOpt = (size: number) => <option value={size}>{size}</option>;
 
   const newOpts = Object.assign({}, opts); // Mutable version of opts that will be used when we click search
+
   const onQueryChange = (text: string) => {
-    newOpts.query = text ? JSON.parse(text) : undefined;
+    try {
+      onOptsUpdate(Object.assign({}, opts, { query: text ? JSON.parse(text) : undefined }));
+    } catch {
+      alert({
+        type: 'danger',
+        text: 'Error parsing Query'
+      });
+    }
   };
   const onProjectionChange = (text: string) => {
-    newOpts.projection = text ? JSON.parse(text) : undefined;
+    try {
+      onOptsUpdate(Object.assign({}, opts, { projection: text ? JSON.parse(text) : undefined }));
+    } catch {
+      alert({
+        type: 'danger',
+        text: 'Error parsing Projection'
+      });
+    }
   };
   const onPageSizeChange = (value: number) => {
-    newOpts.limit = value;
+    onOptsUpdate(Object.assign({}, opts, { limit: value }));
   };
-  const onSubmit = () => search(newOpts);
 
   return (
-    <div class="container">
+    <div class="container my-2">
       <div class="row">
         <div class="col">
           <label>
@@ -144,7 +169,7 @@ function getForm(opts: SearchOpts, search: (opts: SearchOpts) => any) {
             </textarea>
           </label>
         </div>
-        <div class="col-2">
+        <div class="col-auto">
           <label>
             Page Size
             <select
@@ -162,7 +187,7 @@ function getForm(opts: SearchOpts, search: (opts: SearchOpts) => any) {
       </div>
       <div class="row">
         <div class="col">
-          <button class="btn btn-primary" onclick={onSubmit}>
+          <button class="btn btn-primary" onclick={search}>
             Search
           </button>
         </div>
