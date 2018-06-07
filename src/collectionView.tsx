@@ -1,5 +1,5 @@
 import { Component, h } from 'hyperapp';
-import * as R from 'ramda';
+import { range } from './utils';
 
 import {
   CollectionSearchResults,
@@ -135,7 +135,8 @@ function getForm(
 
   const onQueryChange = (text: string) => {
     try {
-      onOptsUpdate(Object.assign({}, opts, { query: text ? JSON.parse(text) : undefined }));
+      const trimmed = text.trim();
+      onOptsUpdate(Object.assign({}, opts, { query: trimmed ? JSON.parse(trimmed) : undefined }));
     } catch {
       alert({
         type: 'danger',
@@ -145,7 +146,10 @@ function getForm(
   };
   const onProjectionChange = (text: string) => {
     try {
-      onOptsUpdate(Object.assign({}, opts, { projection: text ? JSON.parse(text) : undefined }));
+      const trimmed = text.trim();
+      onOptsUpdate(
+        Object.assign({}, opts, { projection: trimmed ? JSON.parse(trimmed) : undefined })
+      );
     } catch {
       alert({
         type: 'danger',
@@ -239,7 +243,7 @@ function getPagination(
     }
   })();
 
-  const pages = R.range(startPage, endPage).map((idx) => pageEle(idx, idx === opts.page, false));
+  const pages = range(startPage, endPage).map((idx) => pageEle(idx, idx === opts.page, false));
 
   // Add the first/last page buttons
   if (startPage === 1) {
